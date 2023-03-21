@@ -1,0 +1,57 @@
+For add a new search button in simplesearch plugins :
+
+Need to modify the page "partialssimplesearch_searchbox.html.twig"
+
+user/plugins/simplesearch/templates/partialssimplesearch_searchbox.html.twig
+
+
+for add the button change the code with :
+
+
+
+
+
+{% set min_chars = config.get('plugins.simplesearch.min_query_length', 3) %}
+
+<div class="search-wrapper">
+    <form name="search" data-simplesearch-form>
+        <input
+            name="searchfield"
+            class="search-input"
+            aria-label="search"
+            type="text"
+            {% if min_chars > 0 %} data-min="{{- min_chars -}}" {% endif %}
+            required
+            placeholder="{{"PLUGIN_SIMPLESEARCH.SEARCH_PLACEHOLDER"|t}}"
+            value="{{ query|e }}"
+            data-search-invalid="{{ "PLUGIN_SIMPLESEARCH.SEARCH_FIELD_MINIMUM_CHARACTERS"|t(min_chars)|raw }}"
+            data-search-separator="{{ config.system.param_sep }}"
+            data-search-input="{{ base_url }}{{ config.plugins.simplesearch.route == '@self' ? '' : (config.plugins.simplesearch.route == '/' ? '' : config.plugins.simplesearch.route) }}/query"
+            id="simplesearch-input"
+        />
+        <button type="button" class="search-submit" id="simplesearch-submit">
+            <img src="{{ url('plugin://simplesearch/assets/search.svg') }}" />
+        </button>
+    </form>
+</div>
+
+<script>
+const searchForm = document.querySelector('[data-simplesearch-form]');
+const searchInput = document.querySelector('#simplesearch-input');
+const searchSubmitButton = document.querySelector('#simplesearch-submit');
+
+searchSubmitButton.addEventListener('click', () => {
+    if (searchInput.value.trim().length >= {{ min_chars }}) {
+        searchForm.action = '{{ base_url }}{{ config.plugins.simplesearch.route == '@self' ? '' : (config.plugins.simplesearch.route == '/' ? '' : config.plugins.simplesearch.route) }}/query:' + searchInput.value.trim();
+        searchForm.submit();
+    }
+});
+
+searchInput.addEventListener('keydown', (event) => {
+    if (event.keyCode === 13 && searchInput.value.trim().length >= {{ min_chars }}) {
+        searchForm.action = '{{ base_url }}{{ config.plugins.simplesearch.route == '@self' ? '' : (config.plugins.simplesearch.route == '/' ? '' : config.plugins.simplesearch.route) }}/query:' + searchInput.value.trim();
+        searchForm.submit();
+    }
+});
+
+</script>
